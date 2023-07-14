@@ -10,7 +10,7 @@
 
 [build]
   base = ""
-  build = "yarn run build:viewer:ci"
+  build = "yarn run build:viewer:viewer"
   publish = "dist"
   ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF . ../ui/ ../core/ ../i18n"
 
