@@ -283,10 +283,10 @@ function PanelStudyBrowserTracking({
     );
     const updatedExpandedStudyInstanceUIDs = shouldCollapseStudy
       ? [
-        ...expandedStudyInstanceUIDs.filter(
-          stdyUid => stdyUid !== StudyInstanceUID
-        ),
-      ]
+          ...expandedStudyInstanceUIDs.filter(
+            stdyUid => stdyUid !== StudyInstanceUID
+          ),
+        ]
       : [...expandedStudyInstanceUIDs, StudyInstanceUID];
 
     setExpandedStudyInstanceUIDs(updatedExpandedStudyInstanceUIDs);
@@ -366,7 +366,7 @@ function PanelStudyBrowserTracking({
           SeriesInstanceUID: displaySet.SeriesInstanceUID,
         });
       }}
-      onClickThumbnail={() => { }}
+      onClickThumbnail={() => {}}
       onDoubleClickThumbnail={onDoubleClickThumbnailHandler}
       activeDisplaySetInstanceUIDs={activeViewportDisplaySetInstanceUIDs}
     />
@@ -428,16 +428,16 @@ function _mapDisplaySets(
       numPanes === 1
         ? []
         : viewports.reduce((acc, viewportData, index) => {
-          if (
-            index < numPanes &&
-            viewportData?.displaySetInstanceUIDs?.includes(
-              ds.displaySetInstanceUID
-            )
-          ) {
-            acc.push(viewportData.viewportLabel);
-          }
-          return acc;
-        }, []);
+            if (
+              index < numPanes &&
+              viewportData?.displaySetInstanceUIDs?.includes(
+                ds.displaySetInstanceUID
+              )
+            ) {
+              acc.push(viewportData.viewportLabel);
+            }
+            return acc;
+          }, []);
 
     const array =
       componentType === 'thumbnailTracked'

@@ -79,9 +79,9 @@ function _createGetImageSrcFromImageIdFn(extensionManager) {
 }
 
 WrappedPanelStudyBrowserTracking.propTypes = {
-  commandsManager: PropTypes.object,
-  extensionManager: PropTypes.object,
-  servicesManager: PropTypes.object,
+  commandsManager: PropTypes.object.isRequired,
+  extensionManager: PropTypes.object.isRequired,
+  servicesManager: PropTypes.object.isRequired,
 };
 
 export default WrappedPanelStudyBrowserTracking;
