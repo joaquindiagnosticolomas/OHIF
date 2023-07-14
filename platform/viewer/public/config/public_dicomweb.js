@@ -11,9 +11,9 @@ window.config = {
     dicomWeb: [
       {
         name: 'aws',
-        wadoUriRoot: 'https://domvja9iplmyu.cloudfront.net/dicomweb',
-        qidoRoot: 'https://domvja9iplmyu.cloudfront.net/dicomweb',
-        wadoRoot: 'https://domvja9iplmyu.cloudfront.net/dicomweb',
+        wadoUriRoot: 'https://estudios.laughing-grothendieck.74-208-159-220.plesk.page:8444/dcm4chee-arc/aets/DCM4CHEE/wado',
+        qidoRoot: 'https://estudios.laughing-grothendieck.74-208-159-220.plesk.page:8444/dcm4chee-arc/aets/DCM4CHEE/rs',
+        wadoRoot: 'https://estudios.laughing-grothendieck.74-208-159-220.plesk.page:8444/dcm4chee-arc/aets/DCM4CHEE/rs',
         qidoSupportsIncludeField: true,
         imageRendering: 'wadors',
         thumbnailRendering: 'wadors',

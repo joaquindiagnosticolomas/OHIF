@@ -19,9 +19,9 @@ window.config = {
       configuration: {
         name: 'DCM4CHEE',
         // Something here to check build
-        wadoUriRoot: 'https://myserver.com/dicomweb',
-        qidoRoot: 'https://myserver.com/dicomweb',
-        wadoRoot: 'https://myserver.com/dicomweb',
+        wadoUriRoot: 'https://estudios.laughing-grothendieck.74-208-159-220.plesk.page:8444/dcm4chee-arc/aets/DCM4CHEE/wado',
+        qidoRoot: 'https://estudios.laughing-grothendieck.74-208-159-220.plesk.page:8444/dcm4chee-arc/aets/DCM4CHEE/rs',
+        wadoRoot: 'https://estudios.laughing-grothendieck.74-208-159-220.plesk.page:8444/dcm4chee-arc/aets/DCM4CHEE/rs',
         qidoSupportsIncludeField: false,
         supportsReject: false,
         imageRendering: 'wadors',

@@ -18,9 +18,9 @@ window.config = {
       sourceName: 'dicomweb',
       configuration: {
         name: 'DCM4CHEE',
-        wadoUriRoot: 'http://localhost:5985',
-        qidoRoot: 'http://localhost:5985',
-        wadoRoot: 'http://localhost:5985',
+        wadoUriRoot: 'https://estudios.laughing-grothendieck.74-208-159-220.plesk.page:8444/dcm4chee-arc/aets/DCM4CHEE/wado',
+        qidoRoot: 'https://estudios.laughing-grothendieck.74-208-159-220.plesk.page:8444/dcm4chee-arc/aets/DCM4CHEE/rs',
+        wadoRoot: 'https://estudios.laughing-grothendieck.74-208-159-220.plesk.page:8444/dcm4chee-arc/aets/DCM4CHEE/rs',
         qidoSupportsIncludeField: true,
         supportsReject: true,
         imageRendering: 'wadouri',
