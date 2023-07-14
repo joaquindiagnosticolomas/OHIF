@@ -23,6 +23,7 @@ import {
 import { useAppConfig } from '@state';
 import Toolbar from '../Toolbar/Toolbar';
 
+
 const { availableLanguages, defaultLanguage, currentLanguage } = i18n;
 
 function ViewerLayout({
@@ -202,6 +203,69 @@ function ViewerLayout({
   const rightPanelComponents = rightPanels.map(getPanelData);
   const viewportComponents = viewports.map(getViewportComponentData);
 
+  const [isHovered, setIsHovered] = useState(false);
+  const [isHovered2, setIsHovered2] = useState(false);
+
+  const [isLeftPanelActive, setIsLeftPanelActive] = useState(!leftPanelDefaultClosed);
+  const [isRightPanelActive, setIsRightPanelActive] = useState(!rightPanelDefaultClosed);
+
+  const containerStyle = {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '40px',
+    borderRadius: '5px',
+    margin: '0 2px', // Agrega el margen deseado a los lados
+    backgroundColor: isHovered ? '#020C2C' : 'transparent',
+    transition: 'background-color 0.3s ease'
+  };
+
+  const clickableStyle = {
+    color: isHovered ? '#87CEFA' : 'white',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    margin: '0 10px',
+    userSelect: 'none',
+    textDecoration: 'none'
+  };
+
+  const containerStyle2 = {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '40px',
+    borderRadius: '5px',
+    margin: '0 2px', // Agrega el margen deseado a los lados
+    backgroundColor: isHovered2 ? '#020C2C' : 'transparent',
+    transition: 'background-color 0.3s ease'
+  };
+
+  const clickableStyle2 = {
+    color: isHovered2 ? '#87CEFA' : 'white',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    margin: '0 10px',
+    userSelect: 'none',
+    textDecoration: 'none'
+  };
+
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+  };
+
+  const handleMouseEnter2 = () => {
+    setIsHovered2(true);
+  };
+
+  const handleMouseLeave2 = () => {
+    setIsHovered2(false);
+  };
+
+
   return (
     <div>
       <Header
@@ -212,7 +276,33 @@ function ViewerLayout({
       >
         <ErrorBoundary context="Primary Toolbar">
           <div className="relative flex justify-center">
+            {/* <div
+              style={containerStyle}
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+            >
+              <span
+                style={clickableStyle}
+                onClick={() => {
+                  setIsLeftPanelActive(!isLeftPanelActive);
+                }}
+              > Series </span>
+            </div> */}
+
             <Toolbar servicesManager={servicesManager} />
+
+            {/* <div
+              style={containerStyle2}
+              onMouseEnter={handleMouseEnter2}
+              onMouseLeave={handleMouseLeave2}
+            >
+              <span
+                style={clickableStyle2}
+                onClick={() => {
+                  setIsRightPanelActive(!isRightPanelActive);
+                }}
+              > . . . </span>
+            </div> */}
           </div>
         </ErrorBoundary>
       </Header>
@@ -232,6 +322,7 @@ function ViewerLayout({
                 activeTabIndex={leftPanelDefaultClosed ? null : 0}
                 tabs={leftPanelComponents}
                 servicesManager={servicesManager}
+                isOpen={isLeftPanelActive ? false : true}
               />
             </ErrorBoundary>
           ) : null}
@@ -247,16 +338,17 @@ function ViewerLayout({
               </ErrorBoundary>
             </div>
           </div>
-          {rightPanelComponents.length ? (
+          {/* {rightPanelComponents.length ? (
             <ErrorBoundary context="Right Panel">
               <SidePanel
                 side="right"
                 activeTabIndex={rightPanelDefaultClosed ? null : 0}
                 tabs={rightPanelComponents}
                 servicesManager={servicesManager}
+                isOpen={isRightPanelActive} // Actualiza esta línea
               />
             </ErrorBoundary>
-          ) : null}
+          ) : null} */}
         </React.Fragment>
       </div>
     </div>

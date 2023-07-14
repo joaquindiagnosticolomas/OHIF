@@ -112,7 +112,7 @@ const toolbarButtons = [
         icon: 'chevron-down',
         label: '',
         isActive: true,
-        tooltip: 'More Measure Tools',
+        tooltip: 'More Tools',
       },
       items: [
         _createToolButton(
@@ -363,17 +363,17 @@ const toolbarButtons = [
       isRadio: true, // ?
       groupId: 'MoreTools',
       primary: _createActionButton(
-        'Reset',
-        'tool-reset',
-        'Reset View',
+        'cine',
+        'tool-cine',
+        'Cine',
         [
           {
-            commandName: 'resetViewport',
+            commandName: 'toggleCine',
             commandOptions: {},
             context: 'CORNERSTONE',
           },
         ],
-        'Reset'
+        'Cine'
       ),
       secondary: {
         icon: 'chevron-down',
@@ -411,7 +411,7 @@ const toolbarButtons = [
         _createActionButton(
           'flip-horizontal',
           'tool-flip-horizontal',
-          'Flip Horizontally',
+          'Horizontally',
           [
             {
               commandName: 'flipViewportHorizontal',
@@ -419,9 +419,9 @@ const toolbarButtons = [
               context: 'CORNERSTONE',
             },
           ],
-          'Flip Horizontal'
+          'Horizontal'
         ),
-        _createToggleButton('StackImageSync', 'link', 'Stack Image Sync', [
+        _createToggleButton('StackImageSync', 'link', 'Image Sync', [
           {
             commandName: 'toggleStackImageSync',
             commandOptions: {},
@@ -431,7 +431,7 @@ const toolbarButtons = [
         _createToggleButton(
           'ReferenceLines',
           'tool-referenceLines', // change this with the new icon
-          'Reference Lines',
+          'Reference',
           [
             {
               commandName: 'toggleReferenceLines',
@@ -587,7 +587,7 @@ const toolbarButtons = [
           ],
           'Calibration Line'
         ),
-        _createActionButton(
+        /* _createActionButton(
           'TagBrowser',
           'list-bullets',
           'Dicom Tag Browser',
@@ -599,7 +599,7 @@ const toolbarButtons = [
             },
           ],
           'Dicom Tag Browser'
-        ),
+        ), */
       ],
     },
   },
