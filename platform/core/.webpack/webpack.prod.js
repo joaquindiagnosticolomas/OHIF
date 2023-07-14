@@ -1,9 +1,9 @@
-const merge = require('webpack-merge');
+const { merge } = require('webpack-merge');
 const path = require('path');
-const webpackCommon = require('./../../../.webpack/webpack.commonjs.js');
-const pkg = require('./../package.json');
+const webpackCommon = require('./../../../.webpack/webpack.base.js');
 
-const ROOT_DIR = path.join(__dirname, './..');
+const pkg = require('./../package.json');
+const ROOT_DIR = path.join(__dirname, './../');
 const SRC_DIR = path.join(__dirname, '../src');
 const DIST_DIR = path.join(__dirname, '../dist');
 
@@ -11,7 +11,6 @@ module.exports = (env, argv) => {
   const commonConfig = webpackCommon(env, argv, { SRC_DIR, DIST_DIR });
 
   return merge(commonConfig, {
-    devtool: 'source-map',
     stats: {
       colors: true,
       hash: true,
@@ -33,5 +32,15 @@ module.exports = (env, argv) => {
       libraryTarget: 'umd',
       filename: pkg.main,
     },
+    externals: [
+      {
+        'cornerstone-math': {
+          commonjs: 'cornerstone-math',
+          commonjs2: 'cornerstone-math',
+          amd: 'cornerstone-math',
+          root: 'cornerstoneMath',
+        },
+      },
+    ],
   });
 };

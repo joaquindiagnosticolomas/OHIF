@@ -1,1 +1,3 @@
-export { Checkbox } from './checkbox.js';
+import CheckBox from './CheckBox';
+
+export default CheckBox;

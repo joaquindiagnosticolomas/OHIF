@@ -1,2 +1,3 @@
-export { MeasurementTable } from './MeasurementTable.js';
-export { MeasurementTableItem } from './MeasurementTableItem.js';
+import MeasurementTable from './MeasurementTable';
+
+export default MeasurementTable;

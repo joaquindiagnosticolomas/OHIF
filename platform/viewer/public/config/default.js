@@ -1,40 +1,121 @@
 window.config = {
-  // default: '/'
   routerBasename: '/',
+  whiteLabeling: {},
+  //whiteLabeling: {
+  //createLogoComponentFn: function (React) {
+  //return React.createElement(
+  //'a',
+  //{
+  //target: '_self',
+  //rel: 'noopener noreferrer',
+  //className: 'text-purple-600 line-through',
+  //href: '/',
+  //},
+  //React.createElement('img', {
+  //src: '../assets/logo-md.png',
+  //className: 'w-8 h-8',
+  //})
+  //);
+  //},
+  //},
   extensions: [],
-  showStudyList: true,
-  filterQueryParam: false,
-  disableServersCache: false,
-  studyPrefetcher: {
-    enabled: true,
-    order: 'closest',
-    displaySetCount: 3,
-    preventCache: false,
-    prefetchDisplaySetsTimeout: 300,
-    maxNumPrefetchRequests: 100,
-    displayProgress: true,
-    includeActiveDisplaySet: true,
+  modes: [],
+  customizationService: {
+    // Shows a custom route -access via http://localhost:3000/custom
+    // helloPage: '@ohif/extension-default.customizationModule.helloPage',
   },
-  servers: {
-    dicomWeb: [
-      {
-        name: 'DCM4CHEE',
-        wadoUriRoot: 'https://server.dcmjs.org/dcm4chee-arc/aets/DCM4CHEE/wado',
-        qidoRoot: 'https://server.dcmjs.org/dcm4chee-arc/aets/DCM4CHEE/rs',
-        wadoRoot: 'https://server.dcmjs.org/dcm4chee-arc/aets/DCM4CHEE/rs',
-        qidoSupportsIncludeField: true,
+  showStudyList: false,
+  // some windows systems have issues with more than 3 web workers
+  maxNumberOfWebWorkers: 3,
+  // below flag is for performance reasons, but it might not work for all servers
+  omitQuotationForMultipartRequest: true,
+  showWarningMessageForCrossOrigin: true,
+  showCPUFallbackMessage: true,
+  showLoadingIndicator: true,
+  strictZSpacingForVolumeViewport: true,
+  maxNumRequests: {
+    interaction: 100,
+    thumbnail: 75,
+    // Prefetch number is dependent on the http protocol. For http 2 or
+    // above, the number of requests can be go a lot higher.
+    prefetch: 25,
+  },
+  // filterQueryParam: false,
+  dataSources: [
+    {
+      friendlyName: 'dcmjs DICOMWeb Server',
+      namespace: '@ohif/extension-default.dataSourcesModule.dicomweb',
+      sourceName: 'dicomweb',
+      configuration: {
+        name: 'aws',
+        // old server
+        // wadoUriRoot: 'https://server.dcmjs.org/dcm4chee-arc/aets/DCM4CHEE/wado',
+        // qidoRoot: 'https://server.dcmjs.org/dcm4chee-arc/aets/DCM4CHEE/rs',
+        // wadoRoot: 'https://server.dcmjs.org/dcm4chee-arc/aets/DCM4CHEE/rs',
+
+        // new server
+        //        wadoUriRoot: 'https://domvja9iplmyu.cloudfront.net/dicomweb',
+        //        qidoRoot: 'https://domvja9iplmyu.cloudfront.net/dicomweb',
+        //        wadoRoot: 'https://domvja9iplmyu.cloudfront.net/dicomweb',
+
+        wadoUriRoot: 'https://estudios.laughing-grothendieck.74-208-159-220.plesk.page:8444/dcm4chee-arc/aets/DCM4CHEE/wado',
+        qidoRoot: 'https://estudios.laughing-grothendieck.74-208-159-220.plesk.page:8444/dcm4chee-arc/aets/DCM4CHEE/rs',
+        wadoRoot: 'https://estudios.laughing-grothendieck.74-208-159-220.plesk.page:8444/dcm4chee-arc/aets/DCM4CHEE/rs',
+
+        qidoSupportsIncludeField: false,
+        supportsReject: false,
         imageRendering: 'wadors',
         thumbnailRendering: 'wadors',
         enableStudyLazyLoad: true,
-        supportsFuzzyMatching: true,
+        supportsFuzzyMatching: false,
+        supportsWildcard: true,
+        staticWado: true,
+        singlepart: 'bulkdata,video,pdf',
       },
-    ],
-  },
+    },
+    {
+      friendlyName: 'dicom json',
+      namespace: '@ohif/extension-default.dataSourcesModule.dicomjson',
+      sourceName: 'dicomjson',
+      configuration: {
+        name: 'json',
+      },
+    },
+    {
+      friendlyName: 'dicom local',
+      namespace: '@ohif/extension-default.dataSourcesModule.dicomlocal',
+      sourceName: 'dicomlocal',
+      configuration: {},
+    },
+  ],
+  httpErrorHandler: error => {
+    // This is 429 when rejected from the public idc sandbox too often.
+    console.warn(error.status);
 
-  // Extensions should be able to suggest default values for these?
-  // Or we can require that these be explicitly set
+    // Could use services manager here to bring up a dialog/modal if needed.
+    console.warn('test, navigate to https://ohif.org/');
+  },
+  // whiteLabeling: {
+  //   /* Optional: Should return a React component to be rendered in the "Logo" section of the application's Top Navigation bar */
+  //   createLogoComponentFn: function (React) {
+  //     return React.createElement(
+  //       'a',
+  //       {
+  //         target: '_self',
+  //         rel: 'noopener noreferrer',
+  //         className: 'text-purple-600 line-through',
+  //         href: '/',
+  //       },
+  //       React.createElement('img',
+  //         {
+  //           src: './customLogo.svg',
+  //           className: 'w-8 h-8',
+  //         }
+  //       ))
+  //   },
+  // },
+  defaultDataSourceName: 'dicomweb',
   hotkeys: [
-    // ~ Global
     {
       commandName: 'incrementActiveViewport',
       label: 'Next Viewport',
@@ -45,18 +126,16 @@ window.config = {
       label: 'Previous Viewport',
       keys: ['left'],
     },
-    // Supported Keys: https://craig.is/killing/mice
-    // ~ Cornerstone Extension
     { commandName: 'rotateViewportCW', label: 'Rotate Right', keys: ['r'] },
     { commandName: 'rotateViewportCCW', label: 'Rotate Left', keys: ['l'] },
     { commandName: 'invertViewport', label: 'Invert', keys: ['i'] },
     {
-      commandName: 'flipViewportVertical',
+      commandName: 'flipViewportHorizontal',
       label: 'Flip Horizontally',
       keys: ['h'],
     },
     {
-      commandName: 'flipViewportHorizontal',
+      commandName: 'flipViewportVertical',
       label: 'Flip Vertically',
       keys: ['v'],
     },
@@ -64,23 +143,24 @@ window.config = {
     { commandName: 'scaleDownViewport', label: 'Zoom Out', keys: ['-'] },
     { commandName: 'fitViewportToWindow', label: 'Zoom to Fit', keys: ['='] },
     { commandName: 'resetViewport', label: 'Reset', keys: ['space'] },
-    // clearAnnotations
     { commandName: 'nextImage', label: 'Next Image', keys: ['down'] },
     { commandName: 'previousImage', label: 'Previous Image', keys: ['up'] },
-    // firstImage
-    // lastImage
+    // {
+    //   commandName: 'previousViewportDisplaySet',
+    //   label: 'Previous Series',
+    //   keys: ['pagedown'],
+    // },
+    // {
+    //   commandName: 'nextViewportDisplaySet',
+    //   label: 'Next Series',
+    //   keys: ['pageup'],
+    // },
     {
-      commandName: 'previousViewportDisplaySet',
-      label: 'Previous Series',
-      keys: ['pagedown'],
+      commandName: 'setToolActive',
+      commandOptions: { toolName: 'Zoom' },
+      label: 'Zoom',
+      keys: ['z'],
     },
-    {
-      commandName: 'nextViewportDisplaySet',
-      label: 'Next Series',
-      keys: ['pageup'],
-    },
-    // ~ Cornerstone Tools
-    { commandName: 'setZoomTool', label: 'Zoom', keys: ['z'] },
     // ~ Window level presets
     {
       commandName: 'windowLevelPreset1',
@@ -128,13 +208,4 @@ window.config = {
       keys: ['9'],
     },
   ],
-  cornerstoneExtensionConfig: {},
-  // Following property limits number of simultaneous series metadata requests.
-  // For http/1.x-only servers, set this to 5 or less to improve
-  //  on first meaningful display in viewer
-  // If the server is particularly slow to respond to series metadata
-  //  requests as it extracts the metadata from raw files everytime,
-  //  try setting this to even lower value
-  // Leave it undefined for no limit, suitable for HTTP/2 enabled servers
-  // maxConcurrentMetadataRequests: 5,
 };

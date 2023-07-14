@@ -23,27 +23,44 @@
 
 
 # Stage 1: Build the application
-
-# Needs to be pinned at 16.x for now because of https://github.com/webpack/webpack/issues/14532
-FROM node:lts-slim as builder
+FROM node:12.22.1-slim as builder
 
 RUN mkdir /usr/src/app
 WORKDIR /usr/src/app
 
+# Copy Files
+COPY .docker /usr/src/app/.docker
+COPY .webpack /usr/src/app/.webpack
+COPY extensions /usr/src/app/extensions
+COPY modes /usr/src/app/modes
+COPY platform /usr/src/app/platform
+COPY .browserslistrc /usr/src/app/.browserslistrc
+COPY aliases.config.js /usr/src/app/aliases.config.js
+COPY babel.config.js /usr/src/app/babel.config.js
+COPY lerna.json /usr/src/app/lerna.json
+COPY package.json /usr/src/app/package.json
+COPY postcss.config.js /usr/src/app/postcss.config.js
+COPY yarn.lock /usr/src/app/yarn.lock
+
+# ADD . /usr/src/app/
+RUN yarn config set workspaces-experimental true
+RUN yarn install
+
 ENV APP_CONFIG=config/docker_openresty-orthanc.js
 ENV PATH /usr/src/app/node_modules/.bin:$PATH
 
-COPY package.json /usr/src/app/package.json
-COPY yarn.lock /usr/src/app/yarn.lock
-
-ADD . /usr/src/app/
-RUN yarn install
+ENV QUICK_BUILD true
 RUN yarn run build
+
+# ADD . /usr/src/app/
+# RUN yarn install
+# RUN yarn run build:web
+
 
 # Stage 2: Bundle the built application into a Docker container
 # which runs openresty (nginx) using Alpine Linux
 # LINK: https://hub.docker.com/r/openresty/openresty
-FROM openresty/openresty:1.19.9.1-4-alpine-fat
+FROM openresty/openresty:1.15.8.1rc1-0-alpine-fat
 
 RUN mkdir /var/log/nginx
 RUN apk add --no-cache openssl

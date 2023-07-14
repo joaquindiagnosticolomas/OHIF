@@ -5,11 +5,13 @@ import Common from './Common.json';
 import DatePicker from './DatePicker.json';
 import Header from './Header.json';
 import MeasurementTable from './MeasurementTable.json';
+import SidePanel from './SidePanel.json';
+import StudyBrowser from './StudyBrowser.json';
 import StudyList from './StudyList.json';
 import UserPreferencesModal from './UserPreferencesModal.json';
 import ViewportDownloadForm from './ViewportDownloadForm.json';
 
-export default { 
+export default {
   'en-US': {
     AboutModal,
     Buttons,
@@ -18,8 +20,10 @@ export default {
     DatePicker,
     Header,
     MeasurementTable,
+    SidePanel,
+    StudyBrowser,
     StudyList,
     UserPreferencesModal,
     ViewportDownloadForm,
-  }
+  },
 };

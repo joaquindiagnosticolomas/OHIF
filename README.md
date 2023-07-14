@@ -2,7 +2,8 @@
 <!-- markdownlint-disable -->
 <div align="center">
   <h1>OHIF Medical Imaging Viewer</h1>
-  <p><strong>The OHIF Viewer</strong> is a zero-footprint medical image viewer provided by the <a href="http://ohif.org/">Open Health Imaging Foundation (OHIF)</a>. It is a configurable and extensible progressive web application with out-of-the-box support for image archives which support <a href="https://www.dicomstandard.org/dicomweb/">DICOMweb</a>.</p>
+  <p><strong>The OHIF Viewer</strong> is a zero-footprint medical image viewer
+provided by the <a href="https://ohif.org/">Open Health Imaging Foundation (OHIF)</a>. It is a configurable and extensible progressive web application with out-of-the-box support for image archives which support <a href="https://www.dicomstandard.org/dicomweb/">DICOMweb</a>.</p>
 </div>
 
 
@@ -82,7 +83,7 @@ We offer support through
 - [Request a Feature 🚀](https://github.com/OHIF/Viewers/issues/new?assignees=&labels=Community%3A+Request+%3Ahand%3A&template=---feature-request.md)
 - [Ask a Question 🤗](https://github.com/OHIF/Viewers/issues/new?assignees=&labels=Community%3A+Question+%3Aquestion%3A&template=---support-question.md)
 
-For commercial support, academic collaberations, and answers to common
+For commercial support, academic collaborations, and answers to common
 questions; please read our
 [documented FAQ](https://docs.ohif.org/faq/index.html#does-ohif-offer-commercial-support).
 
@@ -121,7 +122,8 @@ window.config = {
 };
 ```
 
-- Install the viewer: `window.OHIFViewer.installViewer(window.config);`
+- Install the viewer:
+  `window.OHIFStandaloneViewer.installViewer(window.config);`
 
 This exact setup is demonstrated in this
 [CodeSandbox](https://codesandbox.io/s/viewer-script-tag-tprch) and in our
@@ -172,9 +174,7 @@ also supports a number of commands that can be found in their respective
 | `dev:project <package-name>` | Replace with `core`, `ui`, `i18n`, `cornerstone`, `vtk`, etc. |
 | `test:unit`                  | Jest multi-project test runner; overall coverage              |
 | **Deploy**                   |                                                               |
-| `build`\*                    | Builds production output for our PWA Viewer                   |
-| `build:package`\*            | Builds production `commonjs` output for our Viewer            |
-| `build:package-all`\*        | Builds commonjs bundles for all projects                      |
+| `build`\*                    | Builds production output for our PWA Viewer                   |  |
 
 \* - For more information on our different builds, check out our [Deploy
 Docs][deployment-docs]
@@ -188,24 +188,28 @@ you'll see the following:
 
 ```bash
 .
-├── extensions              #
-│   ├── _example            # Skeleton of example extension
-│   ├── cornerstone         # 2D images w/ Cornerstone.js
-│   ├── dicom-html          # Structured Reports as HTML in viewport
-│   ├── dicom-microscopy    # Whole slide microscopy viewing
-│   ├── dicom-pdf           # View DICOM wrapped PDFs in viewport
-│   └── vtk                 # MPR and Volume support w/ VTK.js
+├── extensions               #
+│   ├── _example             # Skeleton of example extension
+│   ├── default              #
+│   ├── cornerstone       # image rendering and tools w/ Cornerstone
+│   ├── cornerstone- dicom-sr #
+│   └── measurement-tracking #
 │
-├── platform                #
-│   ├── core                # Business Logic
-│   ├── i18n                # Internationalization Support
-│   ├── ui                  # React component library
-│   └── viewer              # Connects platform and extension projects
+├── modes                    #
+│   ├── _example             # Skeleton of example mode
+│   ├── basic-dev-mode       # Basic development mode
+│   └── longitudinal         # Longitudinal mode (measurement tracking)
 │
-├── ...                     # misc. shared configuration
-├── lerna.json              # MonoRepo (Lerna) settings
-├── package.json            # Shared devDependencies and commands
-└── README.md               # This file
+├── platform                 #
+│   ├── core                 # Business Logic
+│   ├── i18n                 # Internationalization Support
+│   ├── ui                   # React component library
+│   └── viewer               # Connects platform and extension projects
+│
+├── ...                      # misc. shared configuration
+├── lerna.json               # MonoRepo (Lerna) settings
+├── package.json             # Shared devDependencies and commands
+└── README.md                # This file
 ```
 
 Want to better understand why and how we've structured this repository? Read
@@ -224,21 +228,31 @@ These projects comprise the
 
 ### Extensions
 
-This is a list of Extensions maintained by the OHIF Core team. It's possible to
+This is a list of Extensions maintained by the OHIF Core team. It is possible to
 customize and configure these extensions, and you can even create your own. You
 can [read more about extensions here][ohif-extensions].
 
-| Name                                                           | Description                                             | Links                  |
-| -------------------------------------------------------------- | ------------------------------------------------------- | ---------------------- |
-| [@ohif/extension-cornestone][extension-cornerstone]            | 2D image viewing, annotation, and segementation tools   | [NPM][cornerstone-npm] |
-| [@ohif/extension-dicom-html][extension-dicom-html]             | Support for viewing DICOM SR as rendered HTML           | [NPM][html-npm]        |
-| [@ohif/extension-dicom-microscopy][extension-dicom-microscopy] | Whole slide microscopy viewing                          | [NPM][microscopy-npm]  |
-| [@ohif/extension-dicom-pdf][extension-dicom-pdf]               | View DICOM wrapped PDFs in a viewport                   | [NPM][pdf-npm]         |
-| [@ohif/extension-vtk][extension-vtk]                           | Volume rendering, reconstruction, and 3D visualizations | [NPM][vtk-npm]         |
+| Name                                                 | Description                                           | Links                  |
+| ---------------------------------------------------- | ----------------------------------------------------- | ---------------------- |
+| [@ohif/extension-cornerstone][extension-cornerstone] | 2D image viewing, annotation, and segementation tools | [NPM][cornerstone-npm] |
 
 ## Acknowledgments
 
 To acknowledge the OHIF Viewer in an academic publication, please cite
+
+> _Open Health Imaging Foundation Viewer: An Extensible Open-Source Framework
+> for Building Web-Based Imaging Applications to Support Cancer Research_
+>
+> Erik Ziegler, Trinity Urban, Danny Brown, James Petts, Steve D. Pieper, Rob
+> Lewis, Chris Hafey, and Gordon J. Harris
+>
+> _JCO Clinical Cancer Informatics_, no. 4 (2020), 336-345, DOI:
+> [10.1200/CCI.19.00131](https://www.doi.org/10.1200/CCI.19.00131)
+>
+> Open-Access on Pubmed Central:
+> https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7259879/
+
+or, for v1, please cite:
 
 > _LesionTracker: Extensible Open-Source Zero-Footprint Web Viewer for Cancer
 > Imaging Research and Clinical Trials_
@@ -258,32 +272,7 @@ Cancer Institute, Informatics Technology for Cancer Research (ITCR) program,
 under a
 [grant to Dr. Gordon Harris at Massachusetts General Hospital (U24 CA199460)](https://projectreporter.nih.gov/project_info_description.cfm?aid=8971104).
 
-## Projects that contributed to OHIF Viewer
-
-The following is a (partial) list of projects that contributed resources towards
-development of OHIF Viewer:
-
-- [NCI Imaging Data Commons (IDC) project](https://imaging.datacommons.cancer.gov/)
-  supported development of new features and bug fixes marked with
-  ["IDC:priority"](https://github.com/OHIF/Viewers/issues?q=is%3Aissue+is%3Aopen+label%3AIDC%3Apriority),
-  ["IDC:candidate"](https://github.com/OHIF/Viewers/issues?q=is%3Aissue+is%3Aopen+label%3AIDC%3Acandidate)
-  or
-  ["IDC:collaboration"](https://github.com/OHIF/Viewers/issues?q=is%3Aissue+is%3Aopen+label%3AIDC%3Acollaboration).
-  NCI Imaging Data Commons is supported by the contract number 19X037Q from
-  Leidos Biomedical Research under Task Order HHSN26100071 from NCI.
-  [IDC Viewer](https://learn.canceridc.dev/portal/visualization) is a customized
-  version of the OHIF Viewer.
-  
-### Research notice
-Please note that this repository is participating in a study into sustainability
- of open source projects. Data will be gathered about this repository for
- approximately the next 12 months, starting from June 2021.
-
-Data collected will include number of contributors, number of PRs, time taken to
- close/merge these PRs, and issues closed.
-
-For more information, please visit
-[our informational page](https://sustainable-open-science-and-software.github.io/) or download our [participant information sheet](https://sustainable-open-science-and-software.github.io/assets/PIS_sustainable_software.pdf).
+This project is tested with BrowserStack. Thank you for supporting open source
 
 ## License
 

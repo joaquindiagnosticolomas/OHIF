@@ -1,2 +1,2 @@
-export { StudyBrowser } from './StudyBrowser.js';
-export { Thumbnail } from './Thumbnail.js';
+import StudyBrowser from './StudyBrowser';
+export default StudyBrowser;

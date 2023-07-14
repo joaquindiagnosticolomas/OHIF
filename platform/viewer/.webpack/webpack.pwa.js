@@ -1,17 +1,16 @@
 // https://developers.google.com/web/tools/workbox/guides/codelabs/webpack
 // ~~ WebPack
 const path = require('path');
-const merge = require('webpack-merge');
+const { merge } = require('webpack-merge');
 const webpack = require('webpack');
 const webpackBase = require('./../../../.webpack/webpack.base.js');
 // ~~ Plugins
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-const ExtractCssChunksPlugin = require('extract-css-chunks-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { InjectManifest } = require('workbox-webpack-plugin');
-// ~~ Rules
-const extractStyleChunksRule = require('./rules/extractStyleChunks.js');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
 // ~~ Directories
 const SRC_DIR = path.join(__dirname, '../src');
 const DIST_DIR = path.join(__dirname, '../dist');
@@ -23,13 +22,23 @@ const APP_CONFIG = process.env.APP_CONFIG || 'config/default.js';
 const PROXY_TARGET = process.env.PROXY_TARGET;
 const PROXY_DOMAIN = process.env.PROXY_DOMAIN;
 const ENTRY_TARGET = process.env.ENTRY_TARGET || `${SRC_DIR}/index.js`;
+const Dotenv = require('dotenv-webpack');
+const writePluginImportFile = require('./writePluginImportsFile.js');
+
+const copyPluginFromExtensions = writePluginImportFile(SRC_DIR, DIST_DIR);
 
 const setHeaders = (res, path) => {
-  res.setHeader('Content-Type', 'text/plain');
   if (path.indexOf('.gz') !== -1) {
     res.setHeader('Content-Encoding', 'gzip');
   } else if (path.indexOf('.br') !== -1) {
     res.setHeader('Content-Encoding', 'br');
+  }
+  if (path.indexOf('.pdf') !== -1) {
+    res.setHeader('Content-Type', 'application/pdf');
+  } else if (path.indexOf('frames') !== -1) {
+    res.setHeader('Content-Type', 'multipart/related');
+  } else {
+    res.setHeader('Content-Type', 'application/json');
   }
 };
 
@@ -55,55 +64,44 @@ module.exports = (env, argv) => {
       },
     },
     resolve: {
-      // We use this alias and the CopyPlugin below to support using the dynamic-import version
-      // of WADO Image Loader, but only when building a PWA. When we build a package, we must use the
-      // bundled version of WADO Image Loader so we can produce a single file for the viewer.
-      // (Note: script-tag version of the viewer will no longer be supported in OHIF v3)
-      alias: {
-        'cornerstone-wado-image-loader':
-          'cornerstone-wado-image-loader/dist/dynamic-import/cornerstoneWADOImageLoader.min.js',
-      },
-    },
-    module: {
-      rules: [...extractStyleChunksRule(isProdBuild)],
+      modules: [
+        // Modules specific to this package
+        path.resolve(__dirname, '../node_modules'),
+        // Hoisted Yarn Workspace Modules
+        path.resolve(__dirname, '../../../node_modules'),
+        SRC_DIR,
+      ],
     },
     plugins: [
-      // Uncomment to generate bundle analyzer
-      // new BundleAnalyzerPlugin(),
+      new Dotenv(),
       // Clean output.path
       new CleanWebpackPlugin(),
       // Copy "Public" Folder to Dist
-      new CopyWebpackPlugin([
-        {
-          from: PUBLIC_DIR,
-          to: DIST_DIR,
-          toType: 'dir',
-          // Ignore our HtmlWebpackPlugin template file
-          // Ignore our configuration files
-          ignore: ['config/*', 'html-templates/*', '.DS_Store'],
-        },
-        // Short term solution to make sure GCloud config is available in output
-        // for our docker implementation
-        {
-          from: `${PUBLIC_DIR}/config/google.js`,
-          to: `${DIST_DIR}/google.js`,
-        },
-        // Copy over and rename our target app config file
-        {
-          from: `${PUBLIC_DIR}/${APP_CONFIG}`,
-          to: `${DIST_DIR}/app-config.js`,
-        },
-        {
-          from:
-            '../../../node_modules/cornerstone-wado-image-loader/dist/dynamic-import',
-          to: DIST_DIR,
-        },
-      ]),
-      // https://github.com/faceyspacey/extract-css-chunks-webpack-plugin#webpack-4-standalone-installation
-      new ExtractCssChunksPlugin({
-        filename: isProdBuild ? '[name].[hash].css' : '[name].css',
-        chunkFilename: isProdBuild ? '[id].[hash].css' : '[id].css',
-        ignoreOrder: false, // Enable to remove warnings about conflicting order
+      new CopyWebpackPlugin({
+        patterns: [
+          ...copyPluginFromExtensions,
+          {
+            from: PUBLIC_DIR,
+            to: DIST_DIR,
+            toType: 'dir',
+            globOptions: {
+              // Ignore our HtmlWebpackPlugin template file
+              // Ignore our configuration files
+              ignore: ['**/config/**', '**/html-templates/**', '.DS_Store'],
+            },
+          },
+          // Short term solution to make sure GCloud config is available in output
+          // for our docker implementation
+          {
+            from: `${PUBLIC_DIR}/config/google.js`,
+            to: `${DIST_DIR}/google.js`,
+          },
+          // Copy over and rename our target app config file
+          {
+            from: `${PUBLIC_DIR}/${APP_CONFIG}`,
+            to: `${DIST_DIR}/app-config.js`,
+          },
+        ],
       }),
       // Generate "index.html" w/ correct includes/imports
       new HtmlWebpackPlugin({
@@ -113,24 +111,25 @@ module.exports = (env, argv) => {
           PUBLIC_URL: PUBLIC_URL,
         },
       }),
-      // No longer maintained; but good for generating icons + manifest
-      // new FaviconsWebpackPlugin( path.join(PUBLIC_DIR, 'assets', 'icons-512.png')),
+      // Generate a service worker for fast local loads
       new InjectManifest({
         swDest: 'sw.js',
         swSrc: path.join(SRC_DIR, 'service-worker.js'),
         // Increase the limit to 4mb:
-        // maximumFileSizeToCacheInBytes: 4 * 1024 * 1024
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+        // Need to exclude the theme as it is updated independently
+        exclude: [/theme/],
+      }),
+      new CopyPlugin({
+        patterns: [
+          {
+            from:
+              '../../../node_modules/cornerstone-wado-image-loader/dist/dynamic-import',
+            to: DIST_DIR,
+          },
+        ],
       }),
     ],
-    optimization: {
-      splitChunks: {
-        // include all types of chunks
-        chunks: 'all',
-      },
-      //runtimeChunk: 'single',
-      minimize: isProdBuild,
-      sideEffects: true,
-    },
     // https://webpack.js.org/configuration/dev-server/
     devServer: {
       // gzip compression of everything served
@@ -144,26 +143,19 @@ module.exports = (env, argv) => {
       client: {
         overlay: { errors: true, warnings: false },
       },
+      proxy: {
+        '/dicomweb': 'http://localhost:5000',
+      },
       static: [
-        {
-          directory: path.join(require('os').homedir(), 'dicomweb'),
-          staticOptions: {
-            extensions: ['gz', 'br'],
-            index: 'index.json.gz',
-            redirect: true,
-            setHeaders,
-          },
-          publicPath: '/dicomweb',
-        },
         {
           directory: '../../testdata',
           staticOptions: {
             extensions: ['gz', 'br'],
-            index: 'index.json.gz',
+            index: ['index.json.gz', 'index.mht.gz'],
             redirect: true,
             setHeaders,
           },
-          publicPath: '/testdata',
+          publicPath: '/viewer-testdata',
         },
       ],
       //public: 'http://localhost:' + 3000,
@@ -179,11 +171,18 @@ module.exports = (env, argv) => {
   });
 
   if (hasProxy) {
-    mergedConfig.devServer.proxy = {};
+    mergedConfig.devServer.proxy = mergedConfig.devServer.proxy || {};
     mergedConfig.devServer.proxy[PROXY_TARGET] = PROXY_DOMAIN;
   }
 
-  if (!isProdBuild) {
+  if (isProdBuild) {
+    mergedConfig.plugins.push(
+      new MiniCssExtractPlugin({
+        filename: '[name].bundle.css',
+        chunkFilename: '[id].css',
+      })
+    );
+  } else {
     mergedConfig.plugins.push(new webpack.HotModuleReplacementPlugin());
   }
 

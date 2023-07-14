@@ -1,5 +1,4 @@
 import guid from '../utils/guid.js';
-import OHIFError from './OHIFError';
 import { Vector3 } from 'cornerstone-math';
 
 const OBJECT = 'object';
@@ -13,7 +12,7 @@ const OBJECT = 'object';
 class ImageSet {
   constructor(images) {
     if (Array.isArray(images) !== true) {
-      throw new OHIFError('ImageSet expects an array of images');
+      throw new Error('ImageSet expects an array of images');
     }
 
     // @property "images"
@@ -31,6 +30,10 @@ class ImageSet {
       writable: false,
       value: guid(), // Unique ID of the instance
     });
+
+    this.instances = images;
+    this.instance = images[0];
+    this.StudyInstanceUID = this.instance?.StudyInstanceUID;
   }
 
   getUID() {
@@ -56,6 +59,8 @@ class ImageSet {
       }
     }
   }
+
+  getNumImages = () => this.images.length;
 
   getImage(index) {
     return this.images[index];

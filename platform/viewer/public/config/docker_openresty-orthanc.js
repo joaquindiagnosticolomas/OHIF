@@ -1,10 +1,20 @@
 window.config = {
   routerBasename: '/',
   showStudyList: true,
-  servers: {
-    // This is an array, but we'll only use the first entry for now
-    dicomWeb: [
-      {
+  extensions: [],
+  modes: [],
+  // below flag is for performance reasons, but it might not work for all servers
+  omitQuotationForMultipartRequest: true,
+  showWarningMessageForCrossOrigin: true,
+  showCPUFallbackMessage: true,
+  showLoadingIndicator: true,
+  strictZSpacingForVolumeViewport: true,
+  dataSources: [
+    {
+      friendlyName: 'Orthanc Server',
+      namespace: '@ohif/extension-default.dataSourcesModule.dicomweb',
+      sourceName: 'dicomweb',
+      configuration: {
         name: 'Orthanc',
         wadoUriRoot: 'http://127.0.0.1/pacs/wado',
         qidoRoot: 'http://127.0.0.1/pacs/dicom-web',
@@ -12,11 +22,22 @@ window.config = {
         qidoSupportsIncludeField: false,
         imageRendering: 'wadors',
         thumbnailRendering: 'wadors',
-        // requestOptions: {
-        // undefined to use JWT + Bearer auth
-        // auth: 'orthanc:orthanc',
-        // },
       },
-    ],
-  },
+    },
+    {
+      friendlyName: 'dicom json',
+      namespace: '@ohif/extension-default.dataSourcesModule.dicomjson',
+      sourceName: 'dicomjson',
+      configuration: {
+        name: 'json',
+      },
+    },
+    {
+      friendlyName: 'dicom local',
+      namespace: '@ohif/extension-default.dataSourcesModule.dicomlocal',
+      sourceName: 'dicomlocal',
+      configuration: {},
+    },
+  ],
+  defaultDataSourceName: 'dicomweb',
 };

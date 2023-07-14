@@ -2,7 +2,7 @@
 <!-- markdownlint-disable -->
 <div align="center">
   <h1>@ohif/viewer</h1>
-  <p><strong>@ohif/viewer</strong> is a zero-footprint medical image viewer provided by the <a href="http://ohif.org/">Open Health Imaging Foundation (OHIF)</a>. It is a configurable and extensible progressive web application with out-of-the-box support for image archives which support <a href="https://www.dicomstandard.org/dicomweb/">DICOMweb</a>.</p>
+  <p><strong>@ohif/viewer</strong> is a zero-footprint medical image viewer provided by the <a href="https://ohif.org/">Open Health Imaging Foundation (OHIF)</a>. It is a configurable and extensible progressive web application with out-of-the-box support for image archives which support <a href="https://www.dicomstandard.org/dicomweb/">DICOMweb</a>.</p>
 </div>
 
 
@@ -115,13 +115,13 @@ Commands to run the tests:
 
 ```js
 // Open Cypress Dashboard that provides insight into what happened when your tests ran
-yarn test:e2e
+yarn run cy
 
 // Run all tests using Electron browser headless
-yarn test:e2e:local
+yarn run cy:run
 
 // Run all tests in CI mode
-yarn run test:e2e:ci
+yarn run cy:run:ci
 ```
 
 ### Contributing

@@ -1,12 +1,10 @@
 import '@percy/cypress';
-import { enable } from 'cornerstone-core';
 import 'cypress-file-upload';
-import { DragSimulator } from '../helpers/DragSimulator.js';
+import { DragSimulator } from './DragSimulator.js';
 import {
   initCornerstoneToolsAliases,
   initCommonElementsAliases,
   initRouteAliases,
-  initVTKToolsAliases,
   initStudyListAliasesOnDesktop,
   initStudyListAliasesOnTablet,
   initPreferencesModalAliases,
@@ -47,26 +45,38 @@ import {
 Cypress.Commands.add('openStudy', PatientName => {
   cy.openStudyList();
   cy.get('#filter-patientNameOrId').type(PatientName);
-  cy.wait('@getStudies');
+  // cy.get('@getStudies').then(() => {
+  cy.wait(1000);
+
   cy.get('[data-cy="study-list-results"]', { timeout: 5000 })
     .contains(PatientName)
     .first()
     .click({ force: true });
 });
 
-Cypress.Commands.add('checkStudyRouteInViewer', StudyInstanceUID => {
-  cy.location('pathname').then($url => {
-    cy.log($url);
-    if ($url == 'blank' || !$url.includes(`/viewer/${StudyInstanceUID}`)) {
-      cy.openStudyInViewer(StudyInstanceUID);
-      cy.waitDicomImage();
-    }
-  });
-});
+Cypress.Commands.add(
+  'checkStudyRouteInViewer',
+  (StudyInstanceUID, otherParams = '') => {
+    cy.location('pathname').then($url => {
+      cy.log($url);
+      if (
+        $url == 'blank' ||
+        !$url.includes(`/basic-test/${StudyInstanceUID}${otherParams}`)
+      ) {
+        cy.openStudyInViewer(StudyInstanceUID, otherParams);
+        cy.waitDicomImage();
+        cy.wait(2000);
+      }
+    });
+  }
+);
 
-Cypress.Commands.add('openStudyInViewer', StudyInstanceUID => {
-  cy.visit(`/viewer/${StudyInstanceUID}`);
-});
+Cypress.Commands.add(
+  'openStudyInViewer',
+  (StudyInstanceUID, otherParams = '') => {
+    cy.visit(`/basic-test?StudyInstanceUIDs=${StudyInstanceUID}${otherParams}`);
+  }
+);
 
 /**
  * Command to search for a Modality and open the study.
@@ -90,33 +100,25 @@ Cypress.Commands.add('openStudyModality', Modality => {
 /**
  * Command to wait and check if a new page was loaded
  *
- * @param {string} url - part of the expected url. Default value is /viewer/
+ * @param {string} url - part of the expected url. Default value is /basic-test
  */
-Cypress.Commands.add('isPageLoaded', (url = '/viewer/') => {
+Cypress.Commands.add('isPageLoaded', (url = '/basic-test') => {
   return cy.location('pathname', { timeout: 60000 }).should('include', url);
 });
 
 Cypress.Commands.add('openStudyList', () => {
   cy.initRouteAliases();
   cy.visit('/');
-  cy.wait('@getStudies');
+
+  // For some reason cypress 12.x does not like to stub the network request
+  // so we just wait herer for 1 second
+  // cy.wait('@getStudies');
+  cy.wait(1000);
 });
 
 Cypress.Commands.add('waitStudyList', () => {
   cy.get('@searchResult').should($list => {
     expect($list).to.not.have.class('no-hover');
-  });
-});
-
-Cypress.Commands.add('waitVTKLoading', () => {
-  // Wait for start loading
-  cy.get('[data-cy="viewprt-grid"]', { timeout: 20000 }).should($grid => {
-    expect($grid).to.contain.text('Loading');
-  });
-
-  // Wait for finish loading
-  cy.get('[data-cy="viewprt-grid"]', { timeout: 90000 }).should($grid => {
-    expect($grid).not.to.contain.text('Loading');
   });
 });
 
@@ -152,9 +154,11 @@ Cypress.Commands.add('addLine', (viewport, firstClick, secondClick) => {
 
     // TODO: Added a wait which appears necessary in Cornerstone Tools >4?
     cy.wrap($viewport)
-      .click(x1, y1).wait(100)
+      .click(x1, y1)
+      .wait(100)
       .trigger('mousemove', { clientX: x2, clientY: y2 })
-      .click(x2, y2).wait(100);
+      .click(x2, y2)
+      .wait(100);
   });
 });
 
@@ -186,9 +190,11 @@ Cypress.Commands.add(
 );
 
 Cypress.Commands.add('expectMinimumThumbnails', (seriesToWait = 1) => {
-  cy.get('[data-cy=thumbnail-list]', { timeout: 50000 }).should($itemList => {
-    expect($itemList.length >= seriesToWait).to.be.true;
-  });
+  cy.get('[data-cy="study-browser-thumbnail"]', { timeout: 50000 }).should(
+    $itemList => {
+      expect($itemList.length >= seriesToWait).to.be.true;
+    }
+  );
 });
 
 //Command to wait DICOM image to load into the viewport
@@ -200,29 +206,40 @@ Cypress.Commands.add('waitDicomImage', (timeout = 50000) => {
       .its('cornerstone')
       .then({ timeout }, $cornerstone => {
         return new Cypress.Promise(resolve => {
-          const onEnabled = enabledEvt => {
-            const element = enabledEvt.detail.element;
-
-            element.addEventListener('cornerstoneimagerendered', onEvent);
-          };
           const onEvent = renderedEvt => {
             const element = renderedEvt.detail.element;
 
-            element.removeEventListener('cornerstoneimagerendered', onEvent);
-            $cornerstone.events.removeEventListener(
-              'cornerstoneimagerendered',
+            element.removeEventListener(
+              $cornerstone.Enums.Events.IMAGE_RENDERED,
+              onEvent
+            );
+            $cornerstone.eventTarget.removeEventListener(
+              $cornerstone.Enums.Events.IMAGE_RENDERED,
               onEvent
             );
             resolve();
           };
+          const onEnabled = enabledEvt => {
+            const element = enabledEvt.detail.element;
+
+            element.addEventListener(
+              $cornerstone.Enums.Events.IMAGE_RENDERED,
+              onEvent
+            );
+
+            $cornerstone.eventTarget.removeEventListener(
+              $cornerstone.Enums.Events.ELEMENT_ENABLED,
+              onEnabled
+            );
+          };
           const enabledElements = $cornerstone.getEnabledElements();
-          if (enabledElements && enabledElements.length && !enabledElements[0].invalid) {
+          if (enabledElements && enabledElements.length) {
             // Sometimes the page finishes rendering before this gets run,
             // if so, just resolve immediately.
             resolve();
           } else {
-            $cornerstone.events.addEventListener(
-              'cornerstoneelementenabled',
+            $cornerstone.eventTarget.addEventListener(
+              $cornerstone.Enums.Events.ELEMENT_ENABLED,
               onEnabled
             );
           }
@@ -234,25 +251,10 @@ Cypress.Commands.add('waitDicomImage', (timeout = 50000) => {
 //Command to reset and clear all the changes made to the viewport
 Cypress.Commands.add('resetViewport', () => {
   //Click on More button
-  cy.get('[data-cy="more"]')
+  cy.get('[data-cy="MoreTools-split-button-primary"]')
+    .should('have.attr', 'data-tool', 'Reset')
     .as('moreBtn')
     .click();
-  //Verify if overlay is displayed
-  cy.get('body').then(body => {
-    if (body.find('.tooltip-toolbar-overlay').length == 0) {
-      cy.get('@moreBtn').click();
-    }
-  });
-  //Click on Clear button
-  cy.get('[data-cy="clear"]')
-    .as('clearBtn')
-    .click();
-  //Click on Reset button
-  cy.get('[data-cy="reset"]')
-    .as('resetBtn')
-    .click();
-
-  cy.get('.tooltip-toolbar-overlay').should('not.exist');
 });
 
 Cypress.Commands.add('imageZoomIn', () => {
@@ -261,19 +263,19 @@ Cypress.Commands.add('imageZoomIn', () => {
 
   //drags the mouse inside the viewport to be able to interact with series
   cy.get('@viewport')
-    .trigger('mousedown', 'top', { which: 1 })
-    .trigger('mousemove', 'center', { which: 1 })
+    .trigger('mousedown', 'top', { buttons: 1 })
+    .trigger('mousemove', 'center', { buttons: 1 })
     .trigger('mouseup');
 });
 
 Cypress.Commands.add('imageContrast', () => {
   cy.initCornerstoneToolsAliases();
-  cy.get('@levelsBtn').click();
+  cy.get('@wwwcBtnPrimary').click();
 
   //drags the mouse inside the viewport to be able to interact with series
   cy.get('@viewport')
-    .trigger('mousedown', 'center', { which: 1 })
-    .trigger('mousemove', 'top', { which: 1 })
+    .trigger('mousedown', 'center', { buttons: 1 })
+    .trigger('mousemove', 'top', { buttons: 1 })
     .trigger('mouseup');
 });
 
@@ -292,36 +294,22 @@ Cypress.Commands.add('initRouteAliases', () => {
   initRouteAliases();
 });
 
-//Initialize aliases for VTK tools
-Cypress.Commands.add('initVTKToolsAliases', () => {
-  initVTKToolsAliases();
-});
-
 //Initialize aliases for Study List page elements
 Cypress.Commands.add('initStudyListAliasesOnDesktop', () => {
   initStudyListAliasesOnDesktop();
-});
-
-//Initialize aliases for Study List page elements
-Cypress.Commands.add('initStudyListAliasesOnTablet', () => {
-  initStudyListAliasesOnTablet();
-});
-
-//Initialize aliases for Study List page elements
-Cypress.Commands.add('initStudyListAliasesOnDesktop', () => {
-  initStudyListAliasesOnDesktop();
-});
-
-//Initialize aliases for Study List page elements
-Cypress.Commands.add('initStudyListAliasesOnTablet', () => {
-  initStudyListAliasesOnTablet();
 });
 
 //Add measurements in the viewport
 Cypress.Commands.add(
   'addLengthMeasurement',
   (firstClick = [150, 100], secondClick = [130, 170]) => {
-    cy.get('[data-cy="length"]').click();
+    cy.get('@measurementToolsBtnPrimary')
+      .should('have.attr', 'data-tool', 'Length')
+      .click()
+      .then($lengthBtn => {
+        cy.wrap($lengthBtn).should('have.class', 'active');
+      });
+
     cy.addLine('.viewport-element', firstClick, secondClick);
   }
 );
@@ -330,7 +318,7 @@ Cypress.Commands.add(
 Cypress.Commands.add(
   'addAngleMeasurement',
   (initPos = [180, 390], midPos = [300, 410], finalPos = [180, 450]) => {
-    cy.get('[data-cy="angle"]').click();
+    cy.get('[data-cy="Angle"]').click();
     cy.addAngle('.viewport-element', initPos, midPos, finalPos);
   }
 );
@@ -464,16 +452,39 @@ Cypress.Commands.add('openPreferences', () => {
   // Open User Preferences modal
   cy.get('body').then(body => {
     if (body.find('.OHIFModal').length === 0) {
-      cy.get('[data-cy="options-menu"]')
+      cy.get('[data-cy="options-chevron-down-icon"]')
         .scrollIntoView()
         .click()
         .then(() => {
-          cy.get('[data-cy="dd-item-menu"]')
+          cy.get('[data-cy="options-dropdown"]')
             .last()
             .click()
             .wait(200);
         });
     }
+  });
+});
+
+Cypress.Commands.add('scrollToIndex', index => {
+  // Workaround implemented based on Cypress issue:
+  // https://github.com/cypress-io/cypress/issues/1570#issuecomment-450966053
+  const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+    window.HTMLInputElement.prototype,
+    'value'
+  ).set;
+
+  cy.get('input.imageSlider[type=range]').then($range => {
+    // get the DOM node
+    const range = $range[0];
+    // set the value manually
+    nativeInputValueSetter.call(range, index);
+    // now dispatch the event
+    range.dispatchEvent(
+      new Event('change', {
+        value: index,
+        bubbles: true,
+      })
+    );
   });
 });
 
@@ -512,9 +523,6 @@ Cypress.Commands.add('resetUserHotkeyPreferences', () => {
     cy.get('@restoreBtn').click();
   });
 
-  // Click on Save Button
-  cy.get('@saveBtn').click();
-
   // Close Success Message overlay (if displayed)
   cy.get('body').then(body => {
     if (body.find('.sb-closeIcon').length > 0) {
@@ -522,6 +530,8 @@ Cypress.Commands.add('resetUserHotkeyPreferences', () => {
         .first()
         .click({ force: true });
     }
+    // Click on Save Button
+    cy.get('@saveBtn').click();
   });
 });
 
@@ -534,9 +544,6 @@ Cypress.Commands.add('resetUserGeneralPreferences', () => {
     cy.get('@restoreBtn').click();
   });
 
-  // Click on Save Button
-  cy.get('@saveBtn').click();
-
   // Close Success Message overlay (if displayed)
   cy.get('body').then(body => {
     if (body.find('.sb-closeIcon').length > 0) {
@@ -544,6 +551,8 @@ Cypress.Commands.add('resetUserGeneralPreferences', () => {
         .first()
         .click({ force: true });
     }
+    // Click on Save Button
+    cy.get('@saveBtn').click();
   });
 });
 
@@ -552,13 +561,12 @@ Cypress.Commands.add(
   (function_label, shortcut) => {
     // Within scopes all `.get` and `.contains` to within the matched elements
     // dom instead of checking from document
-    cy.get('.HotkeysPreferences')
-      .within(() => {
-        cy.contains(function_label) // label we're looking for
-          .parent()
-          .find('input') // closest input to that label
-          .type(shortcut, { force: true }); // Set new shortcut for that function
-      });
+    cy.get('.HotkeysPreferences').within(() => {
+      cy.contains(function_label) // label we're looking for
+        .parent()
+        .find('input') // closest input to that label
+        .type(shortcut, { force: true }); // Set new shortcut for that function
+    });
   }
 );
 
@@ -595,13 +603,8 @@ Cypress.Commands.add(
 
 Cypress.Commands.add('openDownloadImageModal', () => {
   // Click on More button
-  cy.get('[data-cy="more"]')
-    .as('moreBtn')
-    .click();
-
-  // Click on Download button
-  cy.get('[data-cy="download"]')
-    .as('downloadBtn')
+  cy.get('[data-cy="Capture"]')
+    .as('captureBtn')
     .click();
 });
 
@@ -631,3 +634,14 @@ Cypress.Commands.add('setLanguage', (language, save = true) => {
       .click();
   });
 });
+
+// hide noisy logs
+// https://github.com/cypress-io/cypress/issues/7362
+// uncomment this if you really need the network logs
+const origLog = Cypress.log;
+Cypress.log = function(opts, ...other) {
+  if (opts.displayName === 'script' || opts.name === 'request') {
+    return;
+  }
+  return origLog(opts, ...other);
+};
