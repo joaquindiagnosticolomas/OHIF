@@ -1,6 +1,6 @@
 {
   "name": "ohif-monorepo-root",
-  "private": true,
+  "private": false,
   "workspaces": {
     "packages": [
       "platform/*",
