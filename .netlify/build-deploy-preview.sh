@@ -12,7 +12,7 @@ yarn -v
 node -v
 
 # Build && Move PWA Output
-yarn run build:ci
+yarn run build
 mkdir -p ./.netlify/www/pwa
 mv platform/viewer/dist/* .netlify/www/pwa -v
 echo 'Web application built and copied'
