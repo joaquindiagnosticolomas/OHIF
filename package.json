@@ -48,8 +48,8 @@
     "docs:publish": "chmod +x ./build-and-publish-docs.sh && ./build-and-publish-docs.sh",
     "release": "yarn run lerna:version && yarn run lerna:publish",
     "lerna:clean": "lerna clean",
-    "lerna:cache": "sudo ./netlify-lerna-cache.sh",
-    "lerna:restore": "sudo ./netlify-lerna-restore.sh",
+    "lerna:cache": "./netlify-lerna-cache.sh",
+    "lerna:restore": "./netlify-lerna-restore.sh",
     "lerna:version": "npx lerna version prerelease --force-publish",
     "lerna:publish": "lerna publish from-package --dist-tag next",
     "link-list": "npm ls --depth=0 --link=true"
