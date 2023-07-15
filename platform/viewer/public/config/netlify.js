@@ -31,7 +31,6 @@ window.config = {
         staticWado: true,
         singlepart: 'bulkdata,video,pdf',
       },
-    },
     {
       friendlyName: 'dicom json',
       namespace: '@ohif/extension-default.dataSourcesModule.dicomjson',
